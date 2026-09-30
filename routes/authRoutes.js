@@ -1,23 +1,29 @@
 const express = require("express");
 const router = express.Router();
-const { register, login } = require("../controllers/authController");
-const authMiddleware = require("../middleware/authMiddleware");
-const requireRole = require("../middleware/roleMiddleware");
 
+// Controllers & Middleware
+const { register, login } = require("../controllers/authController");
+const authMiddleware = require("../middleware/auth");
+const requireRole = require("../middleware/roleCheck");
+
+// Public endpoints
 router.post("/register", register);
 router.post("/login", login);
 
+// Protected user profile validation
 router.get("/me", authMiddleware, (req, res) => {
-  res.json({ message: "You are logged in", user: req.user });
+  return res.json({
+    authenticated: true,
+    user: req.user,
+  });
 });
 
-router.get(
-  "/admin-only",
-  authMiddleware,
-  requireRole("HR Admin", "Super Admin"),
-  (req, res) => {
-    res.json({ message: "Welcome, admin" });
-  },
-);
+// Admin clearance verification
+router.get("/admin-only", authMiddleware, requireRole("Admin"), (req, res) => {
+  return res.json({
+    status: "success",
+    access: "granted",
+  });
+});
 
 module.exports = router;
