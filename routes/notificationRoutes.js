@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-// Middleware & Controllers
-const authMiddleware = require("../middleware/auth.js");
-const { getMyNotifications } = require("../controllers/notificationController");
+const {
+  getNotifications,
+} = require("../controllers/notificationController.js");
 
-// User notifications
-router.get("/", authMiddleware, getMyNotifications);
+const authMiddleware = require("../middleware/authMiddleware");
+
+router.get("/notifications", authMiddleware, getNotifications);
 
 module.exports = router;
