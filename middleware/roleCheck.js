@@ -8,6 +8,7 @@ const requireRole = (...allowedRoles) => {
       console.warn(
         `Access blocked: User role '${req.user.role}' lacks permissions.`,
       );
+
       return res
         .status(403)
         .json({ error: "Forbidden: Insufficient permissions" });

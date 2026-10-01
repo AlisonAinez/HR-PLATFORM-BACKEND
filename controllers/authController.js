@@ -6,7 +6,7 @@ exports.register = async (req, res) => {
   try {
     let nameInput = req.body.name;
     let emailInput = req.body.email;
-    let passwordInput = req.body.email;
+    let passwordInput = req.body.passowrd;
     let roleInput = req.body.role;
     let checkUser = await Usermodel.findOne({ email: emailInput });
 

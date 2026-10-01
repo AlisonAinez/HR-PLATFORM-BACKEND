@@ -8,7 +8,8 @@ const getNotifications = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      notifications,
+      data: notifications,
+      message: "Notifications gotten successfully",
     });
   } catch (error) {
     res.status(500).json({
