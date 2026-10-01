@@ -1,93 +1,44 @@
 # Sub-Team 1: Foundation, Auth & Core Tech
 
-Handles the Node.js/Express server setup, MongoDB connection, JWT authentication, Role-Based Access Control (RBAC), and global supporting utilities for the HR & Payroll Management Platform MVP.
+Handles server setup, database connection, JWT authentication, Role-Based Access Control (Admin/Employee), and shared utilities (search, notifications) for the HR & Payroll Management Platform MVP.
 
----
+## Tech Stack
 
-## 🎯 Scope
+Node.js, Express.js, MongoDB & Mongoose, JWT, bcrypt
 
-This sub-team doesn't build a product epic directly — it builds what every other epic depends on:
+## Setup
 
-- Server setup and configuration
-- Database connection
-- User registration and login
-- Role-based access control (Admin vs Employee)
-- Global utilities: search, notifications
+1. `npm install`
+2. Copy `.env.example` to `.env`, fill in your own values
+3. `npm run dev`
+4. Confirm "MongoDB connected" and "Server live on port 5000"
 
----
-
-## 🛠️ Tech Stack
-
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** MongoDB & Mongoose ODM
-- **Authentication:** JSON Web Tokens (JWT) & bcrypt
-
----
-
-## 🚀 Status
-
-- [x] Project setup (Express, MongoDB Atlas, CORS)
-- [x] User model (roles: Admin, Employee)
-- [x] Register & login (bcrypt password hashing, JWT issuing)
-- [x] Auth middleware (verifies token)
-- [x] Role middleware (restricts by role)
-- [x] Tested locally (Thunder Client / Postman)
-- [ ] Search utility
-- [ ] Notifications utility
-- [ ] Restructured to match main repo folder layout
-- [ ] Merged into main team repo
-
----
-
-## 📂 Folder Structure
-
-config/ - database connection
-models/ - User schema
-middleware/ - auth & role check
-controllers/ - auth logic (register/login)
-routes/ - auth endpoints
-server.js - app entry point
-
----
-
-## 🔑 Roles
+## Roles
 
 `Admin`, `Employee`
 
----
+## Endpoints
 
-## 📡 Auth Endpoints
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/auth/me` (requires token)
+- `GET /api/auth/admin-only` (requires token + Admin role)
+- `GET /api/notifications` (requires token)
+- `GET /api/search/employees?name=` (requires token)
 
-- `POST /api/auth/register` — create an account
-- `POST /api/auth/login` — returns a JWT token
-- `GET /api/auth/me` — returns the logged-in user (requires token)
-
-Send the token on protected requests as:
-
-Authorization Bearer token
-
----
-
-## 🔒 Protecting a Route (for other sub-teams)
+## Using the middleware in your routes
 
 ```javascript
 const authMiddleware = require("../middleware/auth");
 const requireRole = require("../middleware/roleCheck");
 
-router.post(
-  "/some-route",
-  authMiddleware,
-  requireRole("Admin"),
-  controllerFunction,
-);
+router.post("/some-route", authMiddleware, requireRole("Admin"), controllerFn);
 ```
 
-- `authMiddleware` confirms the request has a valid token
-- `requireRole(...)` restricts access to specific roles
+## Folder structure
 
----
-
-## 👥 Contributors
-
-Alee (Auth, RBAC, core setup) & Al ameen (search utility)
+config/ - database connection
+models/ - schemas
+controllers/ - request logic
+routes/ - URL mapping
+middleware/ - auth & role checks

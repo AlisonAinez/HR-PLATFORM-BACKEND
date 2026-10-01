@@ -1,27 +1,32 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const Usermodel = require("../models/User");
 
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    let nameInput = req.body.name;
+    let emailInput = req.body.email;
+    let passwordInput = req.body.email;
+    let roleInput = req.body.role;
+    let checkUser = await Usermodel.findOne({ email: emailInput });
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ error: "Email already registered" });
+    if (checkUser) {
+      return res.status(400).json({ error: "Email already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      role,
+    let securePassword = await bcrypt.hash(passwordInput, 10);
+    let createdRecord = await Usermodel.create({
+      name: nameInput,
+      email: emailInput,
+      password: securePassword,
+      role: roleInput,
     });
 
-    return res
-      .status(201)
-      .json({ id: user._id, name: user.name, role: user.role });
+    return res.status(201).json({
+      id: createdRecord._id,
+      name: createdRecord.name,
+      role: createdRecord.role,
+    });
   } catch (err) {
     console.error("Registration Error:", err.message);
     return res.status(500).json({ error: "Server error during registration" });
@@ -30,19 +35,20 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let emailInput = req.body.email;
+    let passwordInput = req.body.password;
 
-    const user = await User.findOne({ email });
+    let user = await Usermodel.findOne({ email: emailInput });
     if (!user) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    let isMatch = await bcrypt.compare(passwordInput, user.password);
     if (!isMatch) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    const token = jwt.sign(
+    let token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1d" },

@@ -10,7 +10,6 @@ const requireRole = require("../middleware/roleCheck");
 router.post("/register", register);
 router.post("/login", login);
 
-// Protected user profile validation
 router.get("/me", authMiddleware, (req, res) => {
   return res.json({
     authenticated: true,
@@ -18,7 +17,6 @@ router.get("/me", authMiddleware, (req, res) => {
   });
 });
 
-// Admin clearance verification
 router.get("/admin-only", authMiddleware, requireRole("Admin"), (req, res) => {
   return res.json({
     status: "success",
