@@ -1,0 +1,16 @@
+const selfOrAdmin =
+  (paramName = "userId") =>
+  (req, res, next) => {
+    if (
+      req.user.role === "Admin" ||
+      req.user.userId === req.params[paramName]
+    ) {
+      return next();
+    }
+
+    res
+      .status(403)
+      .json({ success: false, error: "You can pnly access your own records." });
+  };
+
+module.exports = selfOrAdmin;

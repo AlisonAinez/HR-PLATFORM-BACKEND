@@ -1,27 +1,36 @@
-const User = require("../models/User");
+const Employee = require("../models/employee");
+const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 exports.searchEmployees = async (req, res) => {
   try {
-    const { q } = req.query;
-
-    // Employee role restriction
-    const queryCondition = {
-      role: "Employee",
-    };
+    const { q, status, page = 1, limit = 10 } = req.query;
+    const filter = {};
+    filter.company = req.user.companyId;
 
     if (q) {
-      queryCondition.name = { $regex: q, $options: "i" };
+      const regex = new RegExp(escapeRegex(q), "i");
+      filter.$or = [
+        { fullName: regex },
+        { jobTitle: regex },
+        { department: regex },
+      ];
     }
 
-    const employees = await User.find(queryCondition)
-      .select("-password -__v")
-      .sort({ name: 1 });
+    if (status) filter.status = status;
 
-    return res.json(employees);
-  } catch (err) {
-    console.error("Employee Lookup Error:", err.message);
-    return res
+    const skip = (Number(page) - 1) * Number(limit);
+    const [data, total] = await Promise.all([
+      Employee.find(filter)
+        .sort({ fullName: 1 })
+        .skip(skip)
+        .limit(Number(limit)),
+      Employee.countDocuments(filter),
+    ]);
+    res.json({ success: true, total, page: Number(page), data });
+  } catch (error) {
+    console.error("Search error:", error);
+    res
       .status(500)
-      .json({ error: "Failed to search employee database" });
+      .json({ success: false, error: "Failed to search employees" });
   }
 };
